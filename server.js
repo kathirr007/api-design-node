@@ -40,7 +40,12 @@ app.get('/todos/:id', (req, res) => {
     res.json(todo)
 })
 
-// start server
-app.listen(3000, console.log('Server listening on: http://localhost:3000'))
 
 var jsonData = {count: 12, message: 'hey'};
+
+
+// start server
+var port = 3000;
+app.listen(port, function(){
+  console.log(`listening on http://localhost:${port}`);
+});
