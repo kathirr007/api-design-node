@@ -6,8 +6,8 @@ var app = express();
 var _ = require('lodash');
 var morgan = require('morgan');
 
-var lionRouter = require('./lions');
-var tigerRouter = require('./tigers');
+var lionRouter = require('./lions-refactored');
+var tigerRouter = require('./tigers-refactored');
 
 app.use(morgan('dev'))
 app.use(express.static('client'));
@@ -16,10 +16,12 @@ app.use(bodyParser.json());
 // this is called mounting. when ever a req comes in for
 // '/lion' we want to use this router
 app.use('/lions', lionRouter);
+app.use('/tigers', tigerRouter);
 
 app.use(function(err, req, res, next) {
   if (err) {
-    res.status(500).send(error);
+    console.log(err.message)
+    res.status(500).send(err);
   }
 });
 
