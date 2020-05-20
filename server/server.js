@@ -21,7 +21,58 @@ app.use(bodyParser.json());
 var lions = [];
 var id = 0;
 
-// TODO: make the REST routes to perform CRUD on lions
+// POST request to create lion module
+app.post('/lions', (req,res) => {
+    var lion = req.body
+    id++
+    lion.id = id + ''
 
-app.listen(3000);
-console.log('on port 3000');
+    lions.push(lion)
+
+    res.json(lion)
+})
+
+//GET request to get all lions
+app.get('/lions', (req,res) => {
+    res.json(lions)
+})
+
+//GET request to get specific lion
+app.get('/lions/:id', (req,res) => {
+    let lion = _.find(lions, {id: req.params.id})
+
+    res.json(lion || {})
+})
+
+//PUT request to update specific lion
+app.put('/lions/:id', (req,res) => {
+    let update = req.body
+    if(update.id) {
+        delete update.id
+    }
+
+    let lion = _.findIndex(lions, {id: req.params.id})
+    if(!lions[lion]) {
+        res.send()
+    } else {
+        let updatedLion = _.assign(lions[lion], update)
+        res.json(updatedLion)
+    }
+})
+
+app.delete('/lions/:id', (req, res) => {
+    let lion = _.findIndex(lions, {id: req.params.id})
+    if(!lions[lion]) {
+        res.send()
+    } else {
+        let deletedLion = lions[lion]
+        lions.splice(lion, 1)
+        res.json(deletedLion)
+    }
+})
+
+// TODO: make the REST routes to perform CRUD on lions
+let port = 3000
+app.listen(port, (_) => {
+    console.log(`The server listening on http://localhost:${port}`)
+});
