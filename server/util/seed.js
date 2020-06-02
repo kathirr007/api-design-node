@@ -36,7 +36,7 @@ var cleanDB = function() {
   logger.log('... cleaning the DB');
   var cleanPromises = [User, Category, Post]
     .map(function(model) {
-      return model.remove().exec();
+      return model.deleteMany().exec();
     });
   return Promise.all(cleanPromises);
 }
