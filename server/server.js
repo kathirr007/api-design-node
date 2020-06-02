@@ -5,7 +5,7 @@ var config = require('./config/config');
 var logger = require('./util/logger');
 var auth = require('./auth/routes');
 // db.url is different depending on NODE_ENV
-require('mongoose').connect(config.db.url);
+require('mongoose').connect('mongodb://localhost/nodeblog', { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true });
 
 if (config.seed) {
   require('./util/seed');

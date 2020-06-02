@@ -23,6 +23,9 @@ exports.decodeToken = function() {
 
 exports.getFreshUser = function() {
   return function(req, res, next) {
+    User.findById(req.user._id)
+      .then(function(user) {
+        if(!user) {
     // we'll have access to req.user here
     // because we'll use decodeToken in before
     // this function in the middleware stack.
@@ -33,10 +36,16 @@ exports.getFreshUser = function() {
     // to a real user in our DB. Either the user was deleted
     // since the client got the JWT, or
     // it was a JWT from some other source
-
-    // update req.user with fresh user from the
-    // stale token data
-
+          res.status(401).send('Unauthorized')
+        } else {
+          // update req.user with fresh user from the
+          // stale token data
+          req.user = user;
+          next()
+        }
+      }, function(err) {
+        next(err)
+      })
   }
 };
 
@@ -46,15 +55,33 @@ exports.verifyUser = function() {
     var password = req.body.password;
 
     // if no username or password then stop.
-
+    if (!username || !password) {
+      res.status(401).send('You need a username and password..')
+      return
+    }
     // look user up in the DB so we can check
     // if the passwords match for the username
-
-    // use the authenticate() method on a user doc. Passin
-    // in the posted password, it will hash the
-    // password the same way as the current passwords got hashed
-
-
+    User.findOne({username: username})
+      .then(function(user) {
+        if(!user) {
+          res.status(401).send('No user with the given username')
+        } else {
+          // Checking the password here
+          if(!user.authenticate(password)) {
+            // use the authenticate() method on a user doc. Passin
+            // in the posted password, it will hash the
+            // password the same way as the current passwords got hashed
+            res.status(401).send('Wrong password')
+          } else {
+            // if everything is good, then attach the user to req.user
+            // and call next so the controller can sign a token from req.user._id
+            req.user = user;
+            next();
+          }
+        }
+      }, function(err) {
+        next(err);
+      })
   };
 };
 
@@ -63,6 +90,6 @@ exports.signToken = function(id) {
   return jwt.sign(
     {_id: id},
     config.secrets.jwt,
-    {expiresInMinutes: config.expireTime}
+    {expiresIn: config.expireTime}
   );
 };
